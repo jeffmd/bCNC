@@ -712,8 +712,12 @@ class Sender:
 		if self.serial is None: return
 		if self._pause:
 			self.resume()
+			#event.widget.config(text="Pause")
+			print(event.widget)
 		else:
 			self.feedHold()
+			#event.widget.config(text="Resume")
+			print(event.widget)
 
 	#----------------------------------------------------------------------
 	# FIXME ????

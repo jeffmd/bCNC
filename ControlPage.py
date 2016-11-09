@@ -110,13 +110,13 @@ class RunGroup(CNCRibbon.ButtonGroup):
 		tkExtra.Balloon.set(b, _("Run g-code commands from editor to controller"))
 		self.addWidget(b)
 
-		b = Ribbon.LabelButton(self.frame, self, "<<Pause>>",
+		self.pausebutton = Ribbon.LabelButton(self.frame, self, "<<Pause>>",
 				image=Utils.icons["pause32"],
 				text=_("Pause"),
 				compound=TOP,
 				background=Ribbon._BACKGROUND)
-		b.pack(side=LEFT, fill=BOTH)
-		tkExtra.Balloon.set(b, _("Pause running program. Sends either FEED_HOLD ! or CYCLE_START ~"))
+		self.pausebutton.pack(side=LEFT, fill=BOTH)
+		tkExtra.Balloon.set(self.pausebutton, _("Pause/Resume running program. Sends either FEED_HOLD ! or CYCLE_START ~"))
 
 		b = Ribbon.LabelButton(self.frame, self, "<<Stop>>",
 				image=Utils.icons["stop32"],
@@ -125,6 +125,14 @@ class RunGroup(CNCRibbon.ButtonGroup):
 				background=Ribbon._BACKGROUND)
 		b.pack(side=LEFT, fill=BOTH)
 		tkExtra.Balloon.set(b, _("Pause running program and soft reset controller to empty the buffer."))
+
+	def updatePauseButton(self, state):
+		if state:
+			msg = _("Resume")
+		else:
+			msg = _("Pause")
+			
+		self.pauseButton.config(text=msg)
 
 #===============================================================================
 # DRO Frame
