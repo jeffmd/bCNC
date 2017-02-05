@@ -1000,6 +1000,9 @@ class Sender:
 						#print fields
 						if not self._alarm:
 							CNC.vars["state"] = fields[0]
+						elif  self._gcount > 2 and CNC.vars["state"] == CONNECTED:
+ 							# turn off alarm for connected status once a valid gcode event occurs
+ 							self._alarm = False
 						for field in fields[1:]:
 							word = SPLITPAT.split(field)
 							if word[0] == "MPos":
