@@ -282,7 +282,9 @@ class Probe:
 			for i in range(self.xn):
 				lines.append("G0Z%.4f"%(self.zmax))
 				lines.append("G0X%.4fY%.4f"%(x,y))
+				lines.append("%wait")	# added for smoothie
 				lines.append("%sZ%.4fF%g"%(CNC.vars["prbcmd"], self.zmin, CNC.vars["prbfeed"]))
+				lines.append("%wait")	# added for smoothie
 				x += xstep
 			x -= xstep
 			xstep = -xstep
