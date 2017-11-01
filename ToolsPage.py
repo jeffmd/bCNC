@@ -140,7 +140,7 @@ class _Base:
 
 			if t=="color":
 				try:
-					self.master.listbox.lists[1].itemconfig(END, background=value)
+					self.master.listbox.listbox(1).itemconfig(END, background=value)
 				except TclError:
 					pass
 
@@ -183,7 +183,7 @@ class _Base:
 	# Edit tool listbox
 	#----------------------------------------------------------------------
 	def edit(self, event=None, rename=False):
-		lb = self.master.listbox.lists[1]
+		lb = self.master.listbox.listbox(1)
 		if event is None or event.type=="2":
 			keyboard = True
 		else:
@@ -508,7 +508,8 @@ class Config(_Base):
 		self.name = "CNC"
 		self.variables = [
 			("units"         , "bool", 0    , _("Units (inches)"))   ,
-			("lasercutter"   , "bool", 0    , _("Lasercutter"))   ,
+			("lasercutter"   , "bool", 0    , _("Laser Cutter"))   ,
+			("laseradaptive" , "bool", 0    , _("Laser Adaptive Power"))   ,
 			("doublesizeicon", "bool", 0    , _("Double Size Icon"))   ,
 			("acceleration_x", "mm"  , 25.0 , _("Acceleration x"))   ,
 			("acceleration_y", "mm"  , 25.0 , _("Acceleration y"))   ,
@@ -810,6 +811,7 @@ class Controller(_Base):
 			("grbl_130", "float",  200.,    _("$130 X max travel [mm]")),
 			("grbl_131", "float",  200.,    _("$131 Y max travel [mm]")),
 			("grbl_132", "float",  200.,    _("$132 Z max travel [mm]"))]
+		self.buttons.append("exe")
 
 	# ----------------------------------------------------------------------
 	def execute(self, app):
@@ -1416,7 +1418,7 @@ class ToolsFrame(CNCRibbon.PageFrame):
 		self.toolList.bindList("<Key-space>",	self.edit)
 #		self.toolList.bindList("<Key-space>",	self.commandFocus)
 #		self.toolList.bindList("<Control-Key-space>",	self.commandFocus)
-		self.toolList.lists[1].bind("<ButtonRelease-1>", self.edit)
+		self.toolList.listbox(1).bind("<ButtonRelease-1>", self.edit)
 		self.tools.setListbox(self.toolList)
 		self.addWidget(self.toolList)
 
