@@ -2200,7 +2200,6 @@ class GCode:
 	def init(self):
 		self.filename = ""
 		self.blocks   = []		# list of blocks
-#		self.tabs     = []		# list of tabs
 		self.vars.clear()
 		self.undoredo.reset()
 #		self.probe.init()
@@ -2259,11 +2258,6 @@ class GCode:
 	# add new line to list create block if necessary
 	#----------------------------------------------------------------------
 	def _addLine(self, line):
-#		if line.startswith("(Tab:"):
-#			items = map(float,line.replace("(Tab:","").replace(")","").split())
-#			self.tabs.append(Tab(*items))
-#			return
-
 		if line.startswith("(Block-name:"):
 			self._blocksExist = True
 			pat = BLOCKPAT.match(line)
@@ -2328,9 +2322,6 @@ class GCode:
 		except:
 			return False
 
-		# write tabs if any
-#		for tab in self.tabs:
-#			f.write("(Tab:%g %g %g %g %g)\n"%(tab.xmin, tab.ymin, tab.xmax, tab.ymax, tab.z))
 		for block in self.blocks:
 			block.write(f)
 		f.close()
@@ -2565,12 +2556,12 @@ class GCode:
 				block = Block(path[0].name)
 
 		def addSegment(segment):
-			x,y = segment.end
+			x,y = segment.B
 			if segment.type == Segment.LINE:
-				x,y = segment.end
+				x,y = segment.B
 				block.append("g1 %s %s"%(self.fmt("x",x,7),self.fmt("y",y,7)))
 			elif segment.type in (Segment.CW, Segment.CCW):
-				ij = segment.center - segment.start
+				ij = segment.C - segment.A
 				if abs(ij[0])<1e-5: ij[0] = 0.
 				if abs(ij[1])<1e-5: ij[1] = 0.
 				block.append("g%d %s %s %s %s" % \
@@ -2579,7 +2570,7 @@ class GCode:
 					 self.fmt("i",ij[0],7),self.fmt("j",ij[1],7)))
 
 		if isinstance(path, Path):
-			x,y = path[0].start
+			x,y = path[0].A
 			if z is None: z = self.cnc["surface"]
 			if entry:
 				block.append("g0 %s %s"%(self.fmt("x",x,7),self.fmt("y",y,7)))
@@ -2596,12 +2587,12 @@ class GCode:
 						setfeed = True
 					prevInside = segment._inside
 				addSegment(segment)
-#				x,y = segment.end
+#				x,y = segment.B
 #				if segment.type == Segment.LINE:
-#					x,y = segment.end
+#					x,y = segment.B
 #					block.append("g1 %s %s"%(self.fmt("x",x,7),self.fmt("y",y,7)))
 #				elif segment.type in (Segment.CW, Segment.CCW):
-#					ij = segment.center - segment.start
+#					ij = segment.C - segment.A
 #					if abs(ij[0])<1e-5: ij[0] = 0.
 #					if abs(ij[1])<1e-5: ij[1] = 0.
 #					block.append("g%d %s %s %s %s" % \
@@ -3261,7 +3252,7 @@ class GCode:
 					if number>0:
 						distance = length / float(number)
 					s = 0.0			# running length
-					P = path[0].start
+					P = path[0].A
 					lines.append("g0 %s %s"%(self.fmt("x",P[0]),self.fmt("y",P[1])))
 					drillHole(lines)
 					for segment in path:
@@ -3278,14 +3269,14 @@ class GCode:
 								s = distance-(remain-l)
 								break
 							if segment.type == Segment.LINE:
-								P = segment.start + (remain/l)*segment.AB
+								P = segment.A + (remain/l)*segment.AB
 							else:
 								if segment.type == Segment.CW:
 									phi = segment.startPhi - remain / segment.radius
 								else:
 									phi = segment.startPhi + remain / segment.radius
-								P = Vector(segment.center[0] + segment.radius*math.cos(phi),
-									   segment.center[1] + segment.radius*math.sin(phi))
+								P = Vector(segment.C[0] + segment.radius*math.cos(phi),
+									   segment.C[1] + segment.radius*math.sin(phi))
 							lines.append("g0 %s %s"%(self.fmt("x",P[0]),self.fmt("y",P[1])))
 							drillHole(lines)
 			undoinfo.append(self.setBlockLinesUndo(bid,lines))
@@ -3418,14 +3409,14 @@ class GCode:
 							s = d-(remain-l)
 							break
 						if segment.type == Segment.LINE:
-							P = segment.start + (remain/l)*segment.AB
+							P = segment.A + (remain/l)*segment.AB
 						else:
 							if segment.type == Segment.CW:
 								phi = segment.startPhi - remain / segment.radius
 							else:
 								phi = segment.startPhi + remain / segment.radius
-							P = Vector(segment.center[0] + segment.radius*math.cos(phi),
-								   segment.center[1] + segment.radius*math.sin(phi))
+							P = Vector(segment.C[0] + segment.radius*math.cos(phi),
+								   segment.C[1] + segment.radius*math.sin(phi))
 						tab = Tab(P[0],P[1],dx,dy,z)
 						undoinfo.append(self.addTabUndo(bid,0,tab))
 		self.addUndo(undoinfo)
@@ -3523,11 +3514,16 @@ class GCode:
 				opath = path.offset(D*offset, newname)
 #				print "OFFSET\n",opath
 				if opath:
+#					import time
+#					t0 = time.time()
 					opath.intersectSelf()
+#					t1=time.time(); print "intersectSelf",t1-t0; t0=t1
 #					print "INTERSECT\n",opath
 					opath.removeExcluded(path, D*offset)
+#					t1=time.time(); print "removeExcluded",t1-t0; t0=t1
 #					print "EXCLUDE\n",opath
 					opath.removeZeroLength(abs(offset)/100.)
+#					t1=time.time(); print "removeZeroLength",t1-t0; t0=t1
 #					print "REMOVE\n",opath
 				opath = opath.split2contours()
 				if opath:
@@ -3723,6 +3719,7 @@ class GCode:
 							newcmd.append("G%d"%(self.cnc.gcode))
 						else:	# the rest leave unchanged
 							newcmd.append(cmd)
+						present += c
 					# Append motion commands if not exist and changed
 					check = "XYZ"
 					if 'I' in new or 'J' in new or 'K' in new:

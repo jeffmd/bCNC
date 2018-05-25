@@ -52,13 +52,16 @@ __www__     = "https://github.com/vlachoudis/bCNC"
 __contribute__ = \
 		"@effer Filippo Rivato\n" \
 		"@carlosgs Carlos Garcia Saura\n" \
-		"@dguerizec"
+		"@dguerizec\n" \
+		"@buschhardt\n" \
+		"@MARIOBASZ"
 __credits__ = \
 		"@1bigpig\n" \
 		"@chamnit Sonny Jeon\n" \
 		"@onekk Carlo\n" \
 		"@willadams William Adams"
 __translations__ = \
+		"Dutch - @hypothermic\n" \
 		"French - @ThierryM\n" \
 		"German - @feistus, @SteveMoto\n" \
 		"Italian - @onekk\n" \
@@ -77,6 +80,7 @@ LANGUAGES = {
 		"fr"    : u"Fran\u00e7ais",
 		"it"    : "Italiano",
 		"ja"    : "Japanese",
+		"nl"    : "Nederlands",
 		"zh_tw" : "Traditional Chinese",
 		"zh_cn" : "Simplified Chinese",
 		"pt_BR" : "Brazilian - Portuguese",

@@ -309,6 +309,7 @@ class Application(Toplevel,Sender):
 		self.bind('<<Enable>>',		self.editor.enable)
 		self.bind('<<Disable>>',	self.editor.disable)
 		self.bind('<<ChangeColor>>',    self.editor.changeColor)
+		self.bind('<<Comment>>',		self.editor.commentRow)
 
 		# Canvas X-bindings
 		self.bind("<<ViewChange>>",	self.viewChange)
@@ -1378,7 +1379,8 @@ class Application(Toplevel,Sender):
 			if len(line)==1: return "break"
 			line1 = line[1].upper()
 			#if nothing is selected:
-			self.editor.selectAll()
+			if not self.editor.curselection():
+				self.editor.selectAll()
 			if rexx.abbrev("HORIZONTAL",line1):
 				self.executeOnSelection("MIRRORH", False)
 			elif rexx.abbrev("VERTICAL",line1):
@@ -2042,16 +2044,16 @@ class Application(Toplevel,Sender):
 		if self.serial is not None:
 			self.close()
 			serialPage.connectBtn.config(text=_("Open"),
-						background="LightGreen",
-						activebackground="LightGreen")
+						background="Salmon",
+						activebackground="Salmon")
 		else:
 			serialPage = Page.frames["Serial"]
 			device	 = _device or serialPage.portCombo.get()
 			baudrate = _baud   or serialPage.baudCombo.get()
 			if self.open(device, baudrate):
 				serialPage.connectBtn.config(text=_("Close"),
-							background="Salmon",
-							activebackground="Salmon")
+						background="LightGreen",
+						activebackground="LightGreen")
 				self.enable()
 
 	#-----------------------------------------------------------------------
