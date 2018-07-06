@@ -256,6 +256,7 @@ class Application(Toplevel,Sender):
 
 		self.bind('<<New>>',		self.newFile)
 		self.bind('<<Open>>',		self.loadDialog)
+		self.bind('<<Import>>',		lambda x,s=self: s.importFile())
 		self.bind('<<Save>>',		self.saveAll)
 		self.bind('<<SaveAs>>',		self.saveDialog)
 		self.bind('<<Reload>>',		self.reload)
@@ -1283,9 +1284,13 @@ class Application(Toplevel,Sender):
 		# DIR*ECTION
 		elif rexx.abbrev("DIRECTION", cmd, 3):
 			if rexx.abbrev("CLIMB", line[1].upper(), 2):
-				direction = -1
+				direction = -2
 			elif rexx.abbrev("CONVENTIONAL", line[1].upper(), 2):
+				direction =  2
+			elif rexx.abbrev("CW", line[1].upper(), 2):
 				direction =  1
+			elif rexx.abbrev("CCW", line[1].upper(), 2):
+				direction =  -1
 			else:
 				tkMessageBox.showerror(_("Direction command error"),
 					_("Invalid direction %s specified"%(line[1])),
@@ -1671,7 +1676,7 @@ class Application(Toplevel,Sender):
 		elif cmd == "CLOSE":
 			sel = self.gcode.close(items)
 		elif cmd == "DIRECTION":
-			self.gcode.cutDirection(items, *args)
+			sel = self.gcode.cutDirection(items, *args)
 		elif cmd == "DRILL":
 			sel = self.gcode.drill(items, *args)
 		elif cmd == "ORDER":
@@ -1709,7 +1714,7 @@ class Application(Toplevel,Sender):
 		self.setStatus("%s %s"%(cmd," ".join([str(a) for a in args if a is not None])))
 
 	#-----------------------------------------------------------------------
-	def profile(self, direction=None, offset=0.0, overcut=False, name=None):
+	def profile(self, direction=None, offset=0.0, overcut=False, name=None, pocket=False):
 		tool = self.tools["EndMill"]
 		ofs  = self.tools.fromMm(tool["diameter"])/2.0
 		sign = 1.0
@@ -1733,7 +1738,7 @@ class Application(Toplevel,Sender):
 		self.busy()
 		blocks = self.editor.getSelectedBlocks()
 		# on return we have the blocks with the new blocks to select
-		msg = self.gcode.profile(blocks, ofs*sign, overcut, name)
+		msg = self.gcode.profile(blocks, ofs*sign, overcut, name, pocket)
 		if msg:
 			tkMessageBox.showwarning("Open paths",
 					"WARNING: %s"%(msg),
